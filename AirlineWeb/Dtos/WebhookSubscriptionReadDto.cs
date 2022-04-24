@@ -1,6 +1,6 @@
-namespace AirlineWeb.Models;
+namespace AirlineWeb.Dtos;
 
-public class WebhookSubscription
+public class WebhookSubscriptionReadDto
 {
     public int Id { get; set; }
     public string? WebhookUri { get; set; }

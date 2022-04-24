@@ -7,9 +7,10 @@ GO
 
 USE AirlineWebDB
 GO
+
 CREATE TABLE dbo.WebhookSubscriptions
 (
-	Id INT PRIMARY KEY NOT NULL,
+	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
 	WebhookUri NVARCHAR(200) NOT NULL,
 	[Secret] NVARCHAR(100) NOT NULL,
 	WebhookType NVARCHAR(100) NOT NULL,
@@ -17,3 +18,13 @@ CREATE TABLE dbo.WebhookSubscriptions
 )
 PRINT 'Creating WebhookSubscriptions table'
 GO
+
+CREATE TABLE dbo.FlightDetails
+(
+	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+	FlightCode NVARCHAR(10) NOT NULL,
+	Price DECIMAL(19,4) NOT NULL
+)
+PRINT 'Creating FlightDetail table'
+GO
+

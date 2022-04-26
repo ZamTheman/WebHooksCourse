@@ -1,4 +1,6 @@
+using AirlineWeb.Controllers;
 using AirlineWeb.DataAccess;
+using AirlineWeb.MessageBus;
 
 internal class Program
 {
@@ -31,8 +33,10 @@ internal class Program
 
     private static void RegisterDI(IServiceCollection services)
     {
+        services.AddHttpClient();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddTransient<WebhookSubscriptionDataAccess, WebhookSubscriptionDataAccess>();
         services.AddTransient<FlightsDataAccess, FlightsDataAccess>();
+        services.AddSingleton<IMessageBusClient, MessageBusClient>();
     }
 }

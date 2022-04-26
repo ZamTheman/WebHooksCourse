@@ -1,5 +1,6 @@
 using AirlineWeb.DataAccess;
 using AirlineWeb.Dtos;
+using AirlineWeb.MessageBus;
 using AirlineWeb.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,13 @@ public class FlightsController : ControllerBase
 {
     private readonly FlightsDataAccess flightsDataAccess;
     private readonly IMapper mapper;
-    private readonly ILogger<WebhookSubscriptionController> logger;
+    private readonly IMessageBusClient messageBusClient;
 
-    public FlightsController(FlightsDataAccess flightsDataAccess, IMapper mapper, ILogger<WebhookSubscriptionController> logger)
+    public FlightsController(FlightsDataAccess flightsDataAccess, IMapper mapper, IMessageBusClient messageBusClient)
     {
         this.flightsDataAccess = flightsDataAccess;
         this.mapper = mapper;
-        this.logger = logger;
+        this.messageBusClient = messageBusClient;
     }
 
     [HttpGet("{id}", Name = nameof(GetFlightDetailsById))]
@@ -54,7 +55,7 @@ public class FlightsController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<ActionResult<FlightDetailReadDto>> Update(FlightDetailUpdateDto flightDetailUpdateDto)
+    public async Task<ActionResult> Update(FlightDetailUpdateDto flightDetailUpdateDto)
     {
         if (flightDetailUpdateDto.FlightCode is null)
             return NoContent();
@@ -63,14 +64,32 @@ public class FlightsController : ControllerBase
         if (flightDetail is null)
             return NotFound();
 
+        var oldPrice = flightDetail.Price;
+
         mapper.Map(flightDetailUpdateDto, flightDetail);
+
         try
         {
             var succesfulUpdate = await flightsDataAccess.Update(flightDetail);
-            if (succesfulUpdate)
-                return CreatedAtRoute(nameof(GetFlightDetailsById), new { id = flightDetail.Id }, flightDetail);
+            if (oldPrice != flightDetail.Price)
+            {
+                Console.WriteLine("Price change, placing message on bus");
+                var message = new NotificationMessageDto
+                {
+                    WebhookType = "pricechange",
+                    OldPrice = oldPrice,
+                    NewPrice = flightDetail.Price,
+                    FlightCode = flightDetail.FlightCode
+                };
 
-            return BadRequest();
+                messageBusClient.SendMessage(message);
+            }
+            else
+            {
+                Console.WriteLine("No price change");
+            }
+
+            return NoContent();
         }
         catch (Exception ex)
         {

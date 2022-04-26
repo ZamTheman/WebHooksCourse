@@ -30,9 +30,9 @@
             <div class="form-group">
                 <label for="webhooktype">Webhook Type</label>
                 <select id="webhooktype" class="form-control">
-                    <option>Price Change</option>
-                    <option>Seat availability</option>
-                    <option>Flight Delays & Disruptions</option>
+                    <option value="pricechange">Price Change</option>
+                    <option value="seats">Seat availability</option>
+                    <option value="delays">Flight Delays & Disruptions</option>
                 </select>
             </div>
             <button id="register" class="btn btn-primary btn-block" type="submit">Register</button>
@@ -68,7 +68,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             }}));
-                    const rawResponse = await fetch('https://localhost:5001/api/WebhookSubscription', {
+                    const rawResponse = await fetch('https://localhost:7051/api/WebhookSubscription', {
                         method: 'post',
                         body: JSON.stringify({
                             WebhookUri: webhookURI.value,
